@@ -1,0 +1,9 @@
+@use './variables';
+
+.app {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: variables.$light-pink;
+}
