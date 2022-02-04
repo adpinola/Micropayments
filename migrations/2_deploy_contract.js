@@ -1,8 +1,8 @@
-const Subscription = artifacts.require('../contracts/Subscription.sol');
-const { subscriptionValue, durationInMinutes } = require('../environment.json');
+/* eslint-disable no-undef */
+const Micropayments = artifacts.require('../contracts/Micropayments.sol');
 
-const deploy = async (deployer, network, accounts) => {
-  await deployer.deploy(Subscription, subscriptionValue, durationInMinutes);
+const deploy = async (deployer) => {
+  await deployer.deploy(Micropayments, 'ME <> Ganache');
 };
 
 module.exports = deploy;

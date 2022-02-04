@@ -3,19 +3,19 @@
 const Micropayments = artifacts.require('./Micropayments.sol');
 const timeMachine = require('ganache-time-traveler');
 
-const { subscriptionValue, durationInMinutes } = require('../environment.json');
-
 contract('Micropayments Contract should', (accounts) => {
+  const contractName = 'OWNER <> CLAIMER';
+  const initialValue = '1000000000000000000';
   let contractUnderTest;
   let owner;
-  let subscriber;
+  let claimer;
   let snapshotId;
 
   beforeEach(async () => {
     const snapshot = await timeMachine.takeSnapshot();
     snapshotId = snapshot.result;
-    [owner, subscriber] = accounts;
-    contractUnderTest = await Micropayments.new(subscriptionValue, durationInMinutes, { from: owner });
+    [owner, claimer] = accounts;
+    contractUnderTest = await Micropayments.new(contractName, { from: owner, value: initialValue });
   });
 
   afterEach(async () => {
@@ -27,8 +27,8 @@ contract('Micropayments Contract should', (accounts) => {
     expect(ownerAddress).to.equal(owner);
   });
 
-  it('return balance 0 by default', async () => {
+  it('return balance passed on creation by default', async () => {
     const balance = await contractUnderTest.getBalance.call({ from: owner });
-    expect(balance.toNumber()).to.equal(0);
+    expect(balance.toString()).to.equal(initialValue);
   });
 });

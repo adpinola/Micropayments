@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./SignUtils.sol";
 
-contract ReceiverPays {
+contract Micropayments is Ownable {
     using SignUtils for bytes32;
-    address public owner;
     mapping(uint256 => bool) private usedNonces;
+    string public name;
 
-    constructor() payable {
-        owner = msg.sender;
-    }
+    event MicropaymentsCreated(address indexed from, string name, uint256 createdAt, uint256 value);
+    event PaymentClaimed(address indexed from, string name, uint256 at);
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not Owner");
-        _;
+    constructor(string memory _name) payable {
+        name = _name;
+        emit MicropaymentsCreated(owner(), name, block.timestamp, msg.value);
     }
 
     function claimPayment(
@@ -24,12 +24,17 @@ contract ReceiverPays {
     ) external {
         require(!usedNonces[nonce], "Claim already done");
         usedNonces[nonce] = true;
-        bytes32 message = keccak256(abi.encodePacked(msg.sender, amount, nonce, this)).prefixed();
-        require(message.recoverSigner(signature) == owner, "Signature is invalid [owner]");
-        payable(msg.sender).transfer(amount);
+        bytes32 message = keccak256(abi.encodePacked(_msgSender(), amount, nonce, this)).prefixed();
+        require(message.recoverSigner(signature) == owner(), "Signature is invalid [owner]");
+        payable(_msgSender()).transfer(amount);
+        emit PaymentClaimed(_msgSender(), name, block.timestamp);
+    }
+
+    function getBalance() external view onlyOwner returns (uint256) {
+        return address(this).balance;
     }
 
     function shutdown() external onlyOwner {
-        selfdestruct(payable(owner));
+        selfdestruct(payable(owner()));
     }
 }

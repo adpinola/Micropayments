@@ -28,6 +28,7 @@
     "max-len": ["error", { "code": 150 }],
     "no-console": 0,
     "no-nested-ternary": 0,
-    "no-use-before-define": "off"
+    "no-use-before-define": "off",
+    "no-underscore-dangle": "off"
   }
 }
