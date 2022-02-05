@@ -6,6 +6,7 @@ import "./SignUtils.sol";
 
 contract Micropayments is Ownable {
     using SignUtils for bytes32;
+    using SignUtils for bytes;
     mapping(uint256 => bool) private usedNonces;
     string public name;
 

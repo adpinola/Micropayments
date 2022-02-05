@@ -17,9 +17,14 @@ library SignUtils {
         assembly {
             r := mload(add(sig, 32))
             s := mload(add(sig, 64))
-            v := byte(0, mload(add(sig, 96)))
+            v := and(mload(add(sig, 65)), 255)
         }
 
+        if (v < 27) {
+            v += 27;
+        }
+
+        require(v == 27 || v == 28, "Signature is invalid");
         return (v, r, s);
     }
 
@@ -28,7 +33,7 @@ library SignUtils {
         return ecrecover(message, v, r, s);
     }
 
-    function prefixed(bytes32 hash) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
+    function prefixed(bytes32 messageHash) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
     }
 }

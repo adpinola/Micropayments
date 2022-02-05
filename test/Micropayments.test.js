@@ -2,6 +2,8 @@
 /* eslint-disable no-undef */
 const Micropayments = artifacts.require('./Micropayments.sol');
 const timeMachine = require('ganache-time-traveler');
+const truffleAssert = require('truffle-assertions');
+const OffChainValidator = require('./utils/OffChain');
 
 contract('Micropayments Contract should', (accounts) => {
   const contractName = 'OWNER <> CLAIMER';
@@ -27,8 +29,28 @@ contract('Micropayments Contract should', (accounts) => {
     expect(ownerAddress).to.equal(owner);
   });
 
+  it('emit a MicropaymentsCreated event with data', async () => {
+    const { transactionHash } = contractUnderTest;
+    const transactionResult = await truffleAssert.createTransactionResult(contractUnderTest, transactionHash);
+    truffleAssert.eventEmitted(transactionResult, 'MicropaymentsCreated', (ev) => {
+      return ev.from === owner && ev.name === contractName && ev.value.toString() === initialValue;
+    });
+  });
+
   it('return balance passed on creation by default', async () => {
     const balance = await contractUnderTest.getBalance.call({ from: owner });
     expect(balance.toString()).to.equal(initialValue);
+  });
+
+  it('pay the allowed amount to claimer if signature matche', async () => {
+    const offChainValidator = new OffChainValidator(web3, contractUnderTest.address);
+    const allowance = '10000000000';
+    const nonce = Date.now();
+    const signature = await offChainValidator.signTransaction(claimer, allowance, nonce, owner);
+    const transactionResult = await contractUnderTest.claimPayment(allowance, nonce, signature, { from: claimer });
+
+    truffleAssert.eventEmitted(transactionResult, 'PaymentClaimed', (ev) => {
+      return ev.from === claimer && ev.name === contractName;
+    });
   });
 });

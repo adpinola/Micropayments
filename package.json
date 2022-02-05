@@ -69,7 +69,8 @@
     "prettier-plugin-solidity": "^1.0.0-beta.19",
     "regenerator-runtime": "^0.13.9",
     "solhint": "^3.3.6",
-    "solidity-coverage": "^0.7.18"
+    "solidity-coverage": "^0.7.18",
+    "truffle-assertions": "^0.9.2"
   },
   "eslintConfig": {
     "extends": [
