@@ -1,8 +1,9 @@
 import Web3 from 'web3';
 import { Mixed } from 'web3-utils';
 import { fromRpcSig, ecrecover, pubToAddress, stripHexPrefix } from 'ethereumjs-util';
+import IOffChainValidator from './IOffChainValidator';
 
-export default class OffChainValidator {
+export default class OffChainValidator implements IOffChainValidator {
   private _web3: Web3;
   private _contractAddress: string;
   constructor(web3: Web3, contractAddress: string) {
@@ -13,6 +14,12 @@ export default class OffChainValidator {
   async signTransaction(recipient: string, amount: number, nonce: number, signerAddress: string): Promise<string> {
     const hash = this.constructMessage(recipient, amount, nonce);
     return this._web3.eth.sign(hash, signerAddress); // this method is not complaiant with EIP-155: review
+  }
+
+  isValidSignature(recipient: string, amount: number, nonce: number, signature: string, expectedSigner: string): boolean {
+    const message = this.prefixed(this.constructMessage(recipient, amount, nonce));
+    const signer = OffChainValidator.recoverSigner(message, signature);
+    return signer.toLowerCase() === stripHexPrefix(expectedSigner).toLowerCase();
   }
 
   private constructMessage(recipient: string, amount: number, nonce: number): string {
@@ -34,17 +41,10 @@ export default class OffChainValidator {
     return Buffer.from(this._web3.utils.soliditySha3Raw(...valuesToSign));
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  private recoverSigner(message: Buffer, signature: string): string {
+  private static recoverSigner(message: Buffer, signature: string): string {
     const split = fromRpcSig(signature);
     const publicKey = ecrecover(message, split.v, split.r, split.s);
     const signer = pubToAddress(publicKey).toString('hex');
     return signer;
-  }
-
-  isValidSignature(recipient: string, amount: number, nonce: number, signature: string, expectedSigner: string): boolean {
-    const message = this.prefixed(this.constructMessage(recipient, amount, nonce));
-    const signer = this.recoverSigner(message, signature);
-    return signer.toLowerCase() === stripHexPrefix(expectedSigner).toLowerCase();
   }
 }

@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { AbiItem } from 'web3-utils';
 import Web3 from 'web3';
-import ISubscriptionContract from '../services/ethereum/ISubscriptionContract';
+import ISubscriptionContract from '../services/ethereum/IMicropaymentsContract';
 import useSubscriptionContract from '../hooks/useSubscriptionContract';
 import useWeb3 from '../hooks/useWeb3';
 import { abi, networks } from '../assets/Subscription.json';
