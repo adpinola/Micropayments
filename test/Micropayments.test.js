@@ -29,14 +29,6 @@ contract('Micropayments Contract should', (accounts) => {
     expect(ownerAddress).to.equal(owner);
   });
 
-  it('emit a MicropaymentsCreated event with data', async () => {
-    const { transactionHash } = contractUnderTest;
-    const transactionResult = await truffleAssert.createTransactionResult(contractUnderTest, transactionHash);
-    truffleAssert.eventEmitted(transactionResult, 'MicropaymentsCreated', (ev) => {
-      return ev.from === owner && ev.name === contractName && ev.value.toString() === initialValue;
-    });
-  });
-
   it('return balance passed on creation by default', async () => {
     const balance = await contractUnderTest.getBalance.call({ from: owner });
     expect(balance.toString()).to.equal(initialValue);

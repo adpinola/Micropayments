@@ -10,12 +10,10 @@ contract Micropayments is Ownable {
     mapping(uint256 => bool) private usedNonces;
     string public name;
 
-    event MicropaymentsCreated(address indexed from, string name, uint256 createdAt, uint256 value);
     event PaymentClaimed(address indexed from, string name, uint256 at);
 
     constructor(string memory _name) payable {
         name = _name;
-        emit MicropaymentsCreated(owner(), name, block.timestamp, msg.value);
     }
 
     function claimPayment(
