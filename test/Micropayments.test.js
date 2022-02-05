@@ -53,4 +53,74 @@ contract('Micropayments Contract should', (accounts) => {
       return ev.from === claimer && ev.name === contractName;
     });
   });
+
+  it('deny and revert the transaction if the signature was already used', async () => {
+    const ERROR_REASON = 'Claim already done';
+    const offChainValidator = new OffChainValidator(web3, contractUnderTest.address);
+    const allowance = '10000000000';
+    const nonce = Date.now();
+    const signature = await offChainValidator.signTransaction(claimer, allowance, nonce, owner);
+    await contractUnderTest.claimPayment(allowance, nonce, signature, { from: claimer });
+
+    try {
+      await contractUnderTest.claimPayment(allowance, nonce, signature, { from: claimer });
+    } catch (error) {
+      expect(error.reason).to.equal(ERROR_REASON);
+    }
+  });
+
+  it('deny and revert the transaction if the signature was issued by a different account', async () => {
+    const ERROR_REASON = 'Signature is invalid [owner]';
+    const offChainValidator = new OffChainValidator(web3, contractUnderTest.address);
+    const allowance = '10000000000';
+    const nonce = Date.now();
+    const signature = await offChainValidator.signTransaction(claimer, allowance, nonce, claimer);
+    try {
+      await contractUnderTest.claimPayment(allowance, nonce, signature, { from: claimer });
+    } catch (error) {
+      expect(error.reason).to.equal(ERROR_REASON);
+    }
+  });
+
+  it('deny and revert the transaction if the signature has invalid length', async () => {
+    const ERROR_REASON = 'Signature is invalid [length]';
+    const allowance = '10000000000';
+    const nonce = Date.now();
+
+    try {
+      await contractUnderTest.claimPayment(allowance, nonce, '0x000000', { from: claimer });
+    } catch (error) {
+      expect(error.reason).to.equal(ERROR_REASON);
+    }
+  });
+
+  it('deny and revert the transaction if the signature has invalid format v: 0xff ', async () => {
+    const ERROR_REASON = 'Signature is invalid [format]';
+    const r = 'c45f1e97dae24bd47943c4f2344db92db728a2f80d2294555985d90260f6327b';
+    const s = '3c68bb237b52069cb652a7004354342b9ff9276e0ff95a47a1217a16f2fec5ed';
+    const v = 'ff';
+    const allowance = '10000000000';
+    const nonce = Date.now();
+
+    try {
+      await contractUnderTest.claimPayment(allowance, nonce, `0x${r}${s}${v}`, { from: claimer });
+    } catch (error) {
+      expect(error.reason).to.equal(ERROR_REASON);
+    }
+  });
+
+  it('allow calling shutdown() if the owner attempts', async () => {
+    await contractUnderTest.shutdown({ from: owner });
+    const contractBalance = await web3.eth.getBalance(contractUnderTest.address);
+    expect(contractBalance).to.equal('0');
+  });
+
+  it('deny calling shutdown() if the anyone else attempts', async () => {
+    const ERROR_REASON = 'Ownable: caller is not the owner';
+    try {
+      await contractUnderTest.shutdown({ from: claimer });
+    } catch (error) {
+      expect(error.reason).to.equal(ERROR_REASON);
+    }
+  });
 });

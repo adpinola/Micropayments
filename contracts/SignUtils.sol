@@ -24,7 +24,7 @@ library SignUtils {
             v += 27;
         }
 
-        require(v == 27 || v == 28, "Signature is invalid");
+        require(v == 27 || v == 28, "Signature is invalid [format]");
         return (v, r, s);
     }
 
