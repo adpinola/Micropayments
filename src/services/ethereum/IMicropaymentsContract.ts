@@ -1,5 +1,7 @@
-export default interface IMicropaymentsContract {
-  claimPayment: (from: string, value: number) => Promise<void>;
-  getBalance: (from: string) => Promise<number>;
-  shutdown: (from: string) => Promise<void>;
+import IBaseContract from './IBaseContract';
+
+export default interface IMicropaymentsContract extends IBaseContract {
+  claimPayment: (amount: string, nonce: number, signature: string) => Promise<void>;
+  getBalance: () => Promise<number>;
+  shutdown: () => Promise<void>;
 }
