@@ -7,7 +7,7 @@ export default class BaseContract implements IBaseContract {
   contractInstance: Contract;
   userAccount: string;
 
-  constructor(_web3: Web3, abi: AbiItem[], contractAddress: string, userAccount: string) {
+  constructor(_web3: Web3, abi: AbiItem[], contractAddress: string, userAccount = '') {
     this.contractInstance = new _web3.eth.Contract(abi, contractAddress);
     this.userAccount = userAccount;
   }

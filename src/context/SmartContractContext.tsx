@@ -1,15 +1,15 @@
 import React, { FC } from 'react';
 import { AbiItem } from 'web3-utils';
 import Web3 from 'web3';
-import ISubscriptionContract from '../services/ethereum/IMicropaymentsContract';
-import useSubscriptionContract from '../hooks/useSubscriptionContract';
+import IMicropaymentsFactory from '../services/ethereum/IMicropaymentsFactory';
+import useContractFactory from '../hooks/useContractFactory';
 import useWeb3 from '../hooks/useWeb3';
 import { abi, networks } from '../assets/Subscription.json';
 
 const newtworkId = process.env.REACT_APP_EHTEREUM_NETWORK_ID;
 const contractAddress = (networks as any)[newtworkId as string].address;
 
-const SubscriptionContext = React.createContext<ISubscriptionContract | undefined>(undefined);
+const ContractFactoryContext = React.createContext<IMicropaymentsFactory | undefined>(undefined);
 const MetaMaskContext = React.createContext<(() => Promise<void>) | undefined>(undefined);
 const AccountContext = React.createContext<string>('');
 
@@ -19,20 +19,20 @@ interface ISmartContractContextProvider {
 
 const SmartContractContextProvider: FC<ISmartContractContextProvider> = (props) => {
   const { web3, account, connectToMetaMask } = useWeb3();
-  const contractInstance = useSubscriptionContract(web3 as Web3, abi as AbiItem[], contractAddress);
+  const contractInstance = useContractFactory(web3 as Web3, abi as AbiItem[], contractAddress);
   return (
     <AccountContext.Provider value={account}>
       <MetaMaskContext.Provider value={connectToMetaMask}>
-        <SubscriptionContext.Provider value={contractInstance}>{props.children}</SubscriptionContext.Provider>
+        <ContractFactoryContext.Provider value={contractInstance}>{props.children}</ContractFactoryContext.Provider>
       </MetaMaskContext.Provider>
     </AccountContext.Provider>
   );
 };
 
-function useSubscriptionContext() {
-  const context = React.useContext(SubscriptionContext);
+function useContractFactoryContext() {
+  const context = React.useContext(ContractFactoryContext);
   if (context === undefined) {
-    throw new Error('useSubscriptionContext must be used within an SmartContractContextProvider');
+    throw new Error('useContractFactoryContext must be used within an SmartContractContextProvider');
   }
   return context;
 }
@@ -53,4 +53,4 @@ function useAccount() {
   return context;
 }
 
-export { SmartContractContextProvider, useSubscriptionContext, useMetaMask, useAccount };
+export { SmartContractContextProvider, useContractFactoryContext, useMetaMask, useAccount };
