@@ -4,10 +4,11 @@ import Web3 from 'web3';
 import IMicropaymentsFactory from '../services/ethereum/IMicropaymentsFactory';
 import useContractFactory from '../hooks/useContractFactory';
 import useWeb3 from '../hooks/useWeb3';
-import { abi, networks } from '../assets/Subscription.json';
+// import { abi, networks } from '../assets/Subscription.json';
 
-const newtworkId = process.env.REACT_APP_EHTEREUM_NETWORK_ID;
-const contractAddress = (networks as any)[newtworkId as string].address;
+// const newtworkId = process.env.REACT_APP_EHTEREUM_NETWORK_ID;
+const contractAddress = '0x0'; // (networks as any)[newtworkId as string].address;
+const abi = [{ type: 'function' }];
 
 const ContractFactoryContext = React.createContext<IMicropaymentsFactory | undefined>(undefined);
 const MetaMaskContext = React.createContext<(() => Promise<void>) | undefined>(undefined);

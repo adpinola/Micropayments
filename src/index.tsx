@@ -3,13 +3,10 @@ import ReactDOM from 'react-dom';
 import './styles/custom.scss';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { SmartContractContextProvider } from './context/SmartContractContext';
 
 ReactDOM.render(
   <React.StrictMode>
-    <SmartContractContextProvider>
-      <App />
-    </SmartContractContextProvider>
+    <App />
   </React.StrictMode>,
   document.getElementById('root')
 );
