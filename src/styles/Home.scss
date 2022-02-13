@@ -1,3 +1,33 @@
-svg {
-  margin: 3px;
+@use './variables';
+
+#home {
+  height: 100%;
+  .navbar {
+    padding-top: 2rem;
+    .nav-link {
+      margin: 0 10px;
+      color: variables.$black-secondary;
+      background-color: lighten(variables.$light-pink, 10%);
+      font-weight: bold;
+      border: 1px solid variables.$black-primary;
+      border-radius: 2px;
+    }
+  }
+  .content {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    .col {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      h2,
+      h3,
+      h4 {
+        font-weight: lighter;
+        color: variables.$black-secondary;
+      }
+    }
+  }
 }
