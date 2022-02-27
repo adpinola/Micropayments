@@ -6,3 +6,25 @@
   align-items: center;
   background-color: variables.$lightblue;
 }
+
+.icon-button {
+  height: 46px;
+  margin: 3px;
+  border-radius: 50%;
+  border: 0px;
+
+  svg {
+    color: variables.$white-background;
+    margin-bottom: 3px;
+    font-size: 20px;
+  }
+}
+
+.form-button {
+  background-color: #e9ecef;
+  border-color: #ced4da;
+  svg {
+    margin-bottom: 3px;
+    font-size: 20px;
+  }
+}

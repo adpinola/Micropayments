@@ -8,6 +8,19 @@
     display: flex;
     justify-content: center;
 
+    .table-container {
+      width: 100%;
+
+      .actions-container {
+        margin: 10px;
+
+        svg {
+          margin: 3px;
+          font-size: 20px;
+        }
+      }
+    }
+
     #contract-details {
       height: 100%;
       width: 100%;

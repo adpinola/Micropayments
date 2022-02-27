@@ -5,12 +5,15 @@
   .navbar {
     padding-top: 2rem;
     .nav-link {
-      margin: 0 10px;
       color: variables.$black-secondary;
-      background-color: lighten(variables.$light-pink, 10%);
       font-weight: bold;
-      border: 1px solid variables.$black-primary;
-      border-radius: 2px;
+      @media (min-width: 992px) {
+        margin: 0 10px;
+        color: variables.$black-secondary;
+        background-color: lighten(variables.$light-pink, 10%);
+        border: 1px solid variables.$black-primary;
+        border-radius: 2px;
+      }
     }
   }
   .content {
