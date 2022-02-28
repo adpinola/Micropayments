@@ -56,6 +56,7 @@ contract('Micropayments Contract should', (accounts) => {
 
     try {
       await contractUnderTest.claimPayment(allowance, nonce, signature, { from: claimer });
+      expect(false).to.equal(true);
     } catch (error) {
       expect(error.reason).to.equal(ERROR_REASON);
     }
@@ -69,6 +70,7 @@ contract('Micropayments Contract should', (accounts) => {
     const signature = await offChainValidator.signTransaction(claimer, allowance, nonce, claimer);
     try {
       await contractUnderTest.claimPayment(allowance, nonce, signature, { from: claimer });
+      expect(false).to.equal(true);
     } catch (error) {
       expect(error.reason).to.equal(ERROR_REASON);
     }
@@ -81,6 +83,7 @@ contract('Micropayments Contract should', (accounts) => {
 
     try {
       await contractUnderTest.claimPayment(allowance, nonce, '0x000000', { from: claimer });
+      expect(false).to.equal(true);
     } catch (error) {
       expect(error.reason).to.equal(ERROR_REASON);
     }
@@ -96,21 +99,23 @@ contract('Micropayments Contract should', (accounts) => {
 
     try {
       await contractUnderTest.claimPayment(allowance, nonce, `0x${r}${s}${v}`, { from: claimer });
+      expect(false).to.equal(true);
     } catch (error) {
       expect(error.reason).to.equal(ERROR_REASON);
     }
   });
 
-  it('allow calling shutdown() if the owner attempts', async () => {
+  it('allow calling shutdown() if the contract creator attempts', async () => {
     await contractUnderTest.shutdown({ from: owner });
     const contractBalance = await web3.eth.getBalance(contractUnderTest.address);
     expect(contractBalance).to.equal('0');
   });
 
-  it('deny calling shutdown() if the anyone else attempts', async () => {
-    const ERROR_REASON = 'Ownable: caller is not the owner';
+  it('deny calling shutdown() if anyone else attempts', async () => {
+    const ERROR_REASON = 'Caller is not the creator';
     try {
       await contractUnderTest.shutdown({ from: claimer });
+      expect(false).to.equal(true);
     } catch (error) {
       expect(error.reason).to.equal(ERROR_REASON);
     }

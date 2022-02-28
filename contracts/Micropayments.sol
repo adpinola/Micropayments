@@ -9,12 +9,18 @@ contract Micropayments is Ownable {
     using SignUtils for bytes;
     mapping(uint256 => bool) private usedNonces;
     string public name;
+    address public factory;
 
     event PaymentClaimed(address indexed from, string name, uint256 at);
-    event Killed(address indexed from);
 
     constructor(string memory _name) payable {
         name = _name;
+        factory = _msgSender();
+    }
+
+    modifier onlyFromFactory() {
+        require(factory == _msgSender(), "Caller is not the creator");
+        _;
     }
 
     function claimPayment(
@@ -34,9 +40,7 @@ contract Micropayments is Ownable {
         return address(this).balance;
     }
 
-    function shutdown(address caller) internal returns (bool) {
-        // require(caller == owner(), "Only Owner can call shutdown()");
+    function shutdown() public onlyFromFactory {
         selfdestruct(payable(owner()));
-        return true;
     }
 }
