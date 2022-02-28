@@ -30,19 +30,12 @@ import MetaMaskIcon from './MetaMaskIcon';
 import { abi } from '../assets/Micropayments.json';
 import { GenerateSignatureInputData } from '../assets/formData/GenerateSignatureInputData';
 import OffChainValidator from '../services/payments/OffChainValidator';
+import { ClaimInfo } from '../assets/formData/ClaimInfo';
 
 enum WalletStatus {
   Locked = 'Locked',
   Connected = 'Connected',
 }
-
-type ClaimInfo = {
-  signature: string;
-  nonce: number;
-  amount: string;
-  claimerAddress: string;
-  contractAddress: string;
-};
 
 const Company: FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -295,7 +288,7 @@ const Company: FC = () => {
             </InputGroup>
             <InputGroup className="mb-3">
               <InputGroup.Text>Nonce</InputGroup.Text>
-              <FormControl aria-label="Unique nonce for claim order" placeholder={Date.now().toString()} disabled value={claimInfo?.nonce} />
+              <FormControl aria-label="Unique nonce for claim order" placeholder="0" disabled value={claimInfo?.nonce} />
               <Button className="form-button" variant="outline-dark">
                 <FaCopy />
               </Button>
