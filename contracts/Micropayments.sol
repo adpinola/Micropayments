@@ -11,6 +11,7 @@ contract Micropayments is Ownable {
     string public name;
 
     event PaymentClaimed(address indexed from, string name, uint256 at);
+    event Killed(address indexed from);
 
     constructor(string memory _name) payable {
         name = _name;
@@ -33,7 +34,9 @@ contract Micropayments is Ownable {
         return address(this).balance;
     }
 
-    function shutdown() external onlyOwner {
+    function shutdown(address caller) internal returns (bool) {
+        // require(caller == owner(), "Only Owner can call shutdown()");
         selfdestruct(payable(owner()));
+        return true;
     }
 }

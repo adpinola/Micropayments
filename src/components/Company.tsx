@@ -1,46 +1,142 @@
+/* eslint-disable no-debugger */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { FC, useState } from 'react';
-import { Button, Card, Modal, CloseButton, Tooltip, OverlayTrigger, FloatingLabel, FormControl, InputGroup, Accordion } from 'react-bootstrap';
+import React, { FC, useCallback, useEffect, useState } from 'react';
+import {
+  Button,
+  Card,
+  Modal,
+  CloseButton,
+  Tooltip,
+  OverlayTrigger,
+  FloatingLabel,
+  FormControl,
+  InputGroup,
+  Accordion,
+  Toast,
+  Form,
+  Spinner,
+} from 'react-bootstrap';
 import { FaCopy, FaMoneyBillAlt, FaRegPlusSquare, FaTrash } from 'react-icons/fa';
+import { AbiItem, toWei, fromWei } from 'web3-utils';
+import { CreateMicropaymentData } from '../assets/formData/CreateMicropaymentData';
+import { useAccount, useContractFactoryContext, useMetaMask } from '../context/SmartContractContext';
+import useWeb3 from '../hooks/useWeb3';
+import IMicropaymentsContract from '../services/ethereum/IMicropaymentsContract';
+import MicropaymentsContract from '../services/ethereum/MicropaymentsContract';
+import { MicropaymentsData } from '../services/ethereum/MicropaymentsDataType';
 import '../styles/Company.scss';
 import ContractsTable from './ContractsTable';
 import MetaMaskIcon from './MetaMaskIcon';
+import { abi } from '../assets/Micropayments.json';
 
 enum WalletStatus {
   Locked = 'Locked',
   Connected = 'Connected',
 }
 
-const dummyContractData = [
-  { address: '0xbeac3cf3167abd', name: 'Contract A' },
-  { address: '0xbea121c3cfdd3d', name: 'Contract B' },
-  { address: '0xbeacd126873cfd', name: 'Contract C' },
-];
-
 const Company: FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [balance, setBalance] = useState<number>(0);
+  const [instanceBalance, setInstanceBalance] = useState<string>('');
+  const [instanceAddress, setInstanceAddress] = useState<string>('');
+  const [instanceName, setInstanceName] = useState<string>('');
+  const [availableContracts, setAvailableContracts] = useState<Array<MicropaymentsData>>([]);
   const [walletStatus, setWalletStatus] = useState<WalletStatus>(WalletStatus.Locked);
-  const [showModal, setShowModal] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [creatingContract, setCreatingContract] = useState(false);
   const [signOrder, setSignOrder] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [createSpinner, setCreateSpinner] = useState(false);
+  const [micropaymentInstance, setMicropaymentInstance] = useState<IMicropaymentsContract>();
+  const connect = useMetaMask();
+  const account = useAccount();
+  const contractFactory = useContractFactoryContext();
+  const { web3 } = useWeb3();
 
-  const connectWallet = () => {
-    setWalletStatus(WalletStatus.Connected);
+  // #region Account Change
+  useEffect(() => {
+    const onAccountChange = async () => {
+      if (!account || !contractFactory) {
+        setShowToast(false);
+        setWalletStatus(WalletStatus.Locked);
+        return;
+      }
+      if (!(await contractFactory.isOwner(account))) {
+        console.log('You are not the owner of this factory...');
+        setShowToast(true);
+        setWalletStatus(WalletStatus.Locked);
+        return;
+      }
+      contractFactory.updateUserAccount(account);
+      setShowToast(false);
+      setWalletStatus(WalletStatus.Connected);
+    };
+
+    onAccountChange();
+  }, [account, contractFactory]);
+  // #endregion
+
+  // #region Get Contracts
+  const refreshAvilableContracts = useCallback(async () => {
+    debugger;
+    const contracts = await contractFactory.getMicropaymentsContracts();
+    console.log(contracts, contractFactory.userAccount);
+    setAvailableContracts(contracts);
+  }, [contractFactory]);
+
+  useEffect(() => {
+    if (walletStatus === WalletStatus.Connected) refreshAvilableContracts();
+    contractFactory.onMicropaymentsCreated(account, () => {
+      setCreateSpinner(false);
+      setCreatingContract(false);
+      refreshAvilableContracts();
+    });
+  }, [refreshAvilableContracts, walletStatus, contractFactory, account]);
+  // #endregion
+
+  // #region Instance Selected
+  const onSelectContract = (contractData: MicropaymentsData) => {
+    setMicropaymentInstance(new MicropaymentsContract(web3, abi as AbiItem[], contractData.location));
+    setInstanceName(contractData.name);
+    setInstanceAddress(contractData.location);
   };
 
-  const onSelectContract = (address: string) => {
-    console.log('selected contract: ', address);
-    setShowDetails(true);
+  useEffect(() => {
+    const updateInstanceData = async () => {
+      if (!micropaymentInstance) return;
+      // micropaymentInstance.updateUserAccount(account);
+      setInstanceBalance(await micropaymentInstance.getBalance());
+      setShowDetails(true);
+    };
+    updateInstanceData();
+  }, [micropaymentInstance, account]);
+  // #endregion
+
+  // #region Instance actions
+  const depositToInstance = async () => {
+    console.log('deposit');
   };
 
+  const deleteInstance = async () => {
+    await contractFactory.deleteContract(instanceAddress);
+    setShowDetails(false);
+    setMicropaymentInstance(undefined);
+    refreshAvilableContracts();
+  };
+  // #endregion
   const onCreateContract = () => {
     setCreatingContract(true);
   };
 
-  const onConfirmCreate = () => {
-    setCreatingContract(false);
+  const onConfirmCreate = async (event: any) => {
+    try {
+      event.preventDefault();
+      setCreateSpinner(true);
+      const { name, value } = Object.fromEntries(new FormData(event.target)) as unknown as CreateMicropaymentData;
+      await contractFactory.createMicropayment(name, toWei(value));
+    } catch (e) {
+      console.log(e);
+      setCreateSpinner(false);
+    }
   };
 
   const onSignConfirm = () => {
@@ -57,7 +153,7 @@ const Company: FC = () => {
               <div>Create a Contract</div>
             </Button>
           </div>
-          <ContractsTable contractData={dummyContractData} rowSelectedCallback={onSelectContract} />
+          <ContractsTable contractData={availableContracts} rowSelectedCallback={onSelectContract} />
         </div>
         <div id="contract-details" className={showDetails ? 'show' : 'hide'}>
           <Card border="dark" bg="light">
@@ -66,9 +162,9 @@ const Company: FC = () => {
               <CloseButton onClick={() => setShowDetails(false)} />
             </Card.Header>
             <Card.Body>
-              <Card.Title> Contract A</Card.Title>
-              <Card.Subtitle className="mb-2 text-muted">0xbeac3cf3167abd</Card.Subtitle>
-              <Card.Text>Balance: {balance} ETH</Card.Text>
+              <Card.Title>{instanceName}</Card.Title>
+              <Card.Subtitle className="mb-2 text-muted">{instanceAddress}</Card.Subtitle>
+              <Card.Text>Balance: {fromWei(instanceBalance)} ETH</Card.Text>
               <Accordion defaultActiveKey="0">
                 <Accordion.Item eventKey="0">
                   <Accordion.Header>Sign a payment order</Accordion.Header>
@@ -87,12 +183,12 @@ const Company: FC = () => {
             </Card.Body>
             <Card.Footer className="d-flex justify-content-end">
               <OverlayTrigger placement="left" overlay={<Tooltip id="money-tooltip">Deposit funds</Tooltip>}>
-                <Button className="icon-button" variant="dark">
+                <Button className="icon-button" variant="dark" onClick={depositToInstance}>
                   <FaMoneyBillAlt />
                 </Button>
               </OverlayTrigger>
               <OverlayTrigger placement="top" overlay={<Tooltip id="trash-tooltip">Destroy this contract</Tooltip>}>
-                <Button className="icon-button" variant="danger">
+                <Button className="icon-button" variant="danger" onClick={deleteInstance}>
                   <FaTrash />
                 </Button>
               </OverlayTrigger>
@@ -100,30 +196,46 @@ const Company: FC = () => {
           </Card>
         </div>
         <Modal show={walletStatus === WalletStatus.Locked} centered>
-          <Modal.Body>Please, connnect your wallet to continue.</Modal.Body>
-          <Modal.Footer className="d-flex justify-content-center">
-            <Button variant="primary" onClick={connectWallet} className="d-flex">
-              <MetaMaskIcon />
-              <div>Connect with MetaMask</div>
-            </Button>
-          </Modal.Footer>
+          <Modal.Body className="text-center">
+            <div>Please, connnect your wallet to continue.</div>
+            {showToast ? (
+              <Toast className="d-inline-block m-1" bg="danger">
+                <Toast.Body>
+                  <strong>Your are not the owner of this company, please select another account.</strong>
+                </Toast.Body>
+              </Toast>
+            ) : null}
+          </Modal.Body>
+          {!showToast && (
+            <Modal.Footer className="d-flex justify-content-center">
+              <Button variant="primary" onClick={connect} className="d-flex">
+                <MetaMaskIcon />
+                <div>Connect with MetaMask</div>
+              </Button>
+            </Modal.Footer>
+          )}
         </Modal>
         <Modal show={creatingContract} onHide={() => setCreatingContract(false)} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>New Contract</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <FloatingLabel label="Contract Name" className="mb-3">
-              <FormControl name="name" placeholder="choose a name..." required />
-            </FloatingLabel>
-            <InputGroup className="mb-3">
-              <FormControl name="amount" placeholder="0.0000" required />
-              <InputGroup.Text>ETH</InputGroup.Text>
-            </InputGroup>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button onClick={onConfirmCreate}>Confirm</Button>
-          </Modal.Footer>
+          <Form onSubmit={onConfirmCreate}>
+            <Modal.Header closeButton>
+              <Modal.Title>New Contract</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <FloatingLabel label="Contract Name" className="mb-3">
+                <FormControl name="name" placeholder="choose a name..." required />
+              </FloatingLabel>
+              <InputGroup className="mb-3">
+                <FormControl name="value" placeholder="0.0000" required />
+                <InputGroup.Text>ETH</InputGroup.Text>
+              </InputGroup>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button type="submit">
+                {createSpinner ? <Spinner animation="border" as="span" size="sm" /> : null}
+                &nbsp;Confirm&nbsp;
+              </Button>
+            </Modal.Footer>
+          </Form>
         </Modal>
         <Modal show={signOrder} onHide={() => setSignOrder(false)} centered backdrop="static">
           <Modal.Header closeButton>

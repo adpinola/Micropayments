@@ -5,4 +5,5 @@ export default interface IBaseContract {
   userAccount: string;
 
   updateUserAccount: (newAccount: string) => void;
+  isOwner: (account: string) => Promise<boolean>;
 }

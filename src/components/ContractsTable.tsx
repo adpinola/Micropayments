@@ -1,15 +1,11 @@
 import React, { FC } from 'react';
 import { Table } from 'react-bootstrap';
+import { MicropaymentsData } from '../services/ethereum/MicropaymentsDataType';
 import '../styles/ContractsTable.scss';
 
-type ContractData = {
-  address: string;
-  name: string;
-};
-
 interface IContractsTable {
-  contractData: Array<ContractData>;
-  rowSelectedCallback: (address: string) => Promise<void> | void;
+  contractData: Array<MicropaymentsData>;
+  rowSelectedCallback: (contractData: MicropaymentsData) => Promise<void> | void;
 }
 
 const ContractsTable: FC<IContractsTable> = (props: IContractsTable) => {
@@ -25,9 +21,9 @@ const ContractsTable: FC<IContractsTable> = (props: IContractsTable) => {
         </thead>
         <tbody>
           {props.contractData.map((contract, index) => (
-            <tr onClick={() => props.rowSelectedCallback(contract.address)}>
+            <tr key={contract.location} onClick={() => props.rowSelectedCallback(contract)}>
               <td>{index}</td>
-              <td>{contract.address}</td>
+              <td>{contract.location}</td>
               <td>{contract.name}</td>
             </tr>
           ))}

@@ -3,14 +3,10 @@ import IMicropaymentsContract from './IMicropaymentsContract';
 
 export default class MicropaymentsContract extends BaseContract implements IMicropaymentsContract {
   async claimPayment(amount: string, nonce: number, signature: string): Promise<void> {
-    return this.contractInstance.methods.claimPayment(amount, nonce, signature, { from: this.userAccount });
+    return this.contractInstance.methods.claimPayment(amount, nonce, signature).send({ from: this.userAccount });
   }
 
-  async shutdown(): Promise<void> {
-    return this.contractInstance.methods.shutdown({ from: this.userAccount });
-  }
-
-  async getBalance(): Promise<number> {
+  async getBalance(): Promise<string> {
     return this.contractInstance.methods.getBalance().call({ from: this.userAccount });
   }
 

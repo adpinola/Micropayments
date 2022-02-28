@@ -15,4 +15,9 @@ export default class BaseContract implements IBaseContract {
   updateUserAccount(newAccount: string) {
     this.userAccount = newAccount;
   }
+
+  async isOwner(account: string): Promise<boolean> {
+    const currentOwner = await this.contractInstance.methods.owner().call({ from: account });
+    return currentOwner.toLocaleUpperCase() === account.toLocaleUpperCase();
+  }
 }
