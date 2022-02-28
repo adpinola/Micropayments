@@ -6,10 +6,12 @@ import IBaseContract from './IBaseContract';
 export default class BaseContract implements IBaseContract {
   contractInstance: Contract;
   userAccount: string;
+  instanceAddress: string;
 
   constructor(_web3: Web3, abi: AbiItem[], contractAddress: string, userAccount = '') {
     this.contractInstance = new _web3.eth.Contract(abi, contractAddress);
     this.userAccount = userAccount;
+    this.instanceAddress = contractAddress;
   }
 
   updateUserAccount(newAccount: string) {
@@ -18,6 +20,6 @@ export default class BaseContract implements IBaseContract {
 
   async isOwner(account: string): Promise<boolean> {
     const currentOwner = await this.contractInstance.methods.owner().call({ from: account });
-    return currentOwner.toLocaleUpperCase() === account.toLocaleUpperCase();
+    return currentOwner?.toLocaleUpperCase() === account?.toLocaleUpperCase();
   }
 }

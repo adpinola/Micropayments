@@ -28,14 +28,25 @@ import '../styles/Company.scss';
 import ContractsTable from './ContractsTable';
 import MetaMaskIcon from './MetaMaskIcon';
 import { abi } from '../assets/Micropayments.json';
+import { GenerateSignatureInputData } from '../assets/formData/GenerateSignatureInputData';
+import OffChainValidator from '../services/payments/OffChainValidator';
 
 enum WalletStatus {
   Locked = 'Locked',
   Connected = 'Connected',
 }
 
+type ClaimInfo = {
+  signature: string;
+  nonce: number;
+  amount: string;
+  claimerAddress: string;
+  contractAddress: string;
+};
+
 const Company: FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [claimInfo, setClaimInfo] = useState<ClaimInfo>();
   const [instanceBalance, setInstanceBalance] = useState<string>('');
   const [instanceAddress, setInstanceAddress] = useState<string>('');
   const [instanceName, setInstanceName] = useState<string>('');
@@ -77,7 +88,6 @@ const Company: FC = () => {
 
   // #region Get Contracts
   const refreshAvilableContracts = useCallback(async () => {
-    debugger;
     const contracts = await contractFactory.getMicropaymentsContracts();
     console.log(contracts, contractFactory.userAccount);
     setAvailableContracts(contracts);
@@ -103,7 +113,6 @@ const Company: FC = () => {
   useEffect(() => {
     const updateInstanceData = async () => {
       if (!micropaymentInstance) return;
-      // micropaymentInstance.updateUserAccount(account);
       setInstanceBalance(await micropaymentInstance.getBalance());
       setShowDetails(true);
     };
@@ -113,7 +122,7 @@ const Company: FC = () => {
 
   // #region Instance actions
   const depositToInstance = async () => {
-    console.log('deposit');
+    console.error('deposit eth to this contract is not yet implemented');
   };
 
   const deleteInstance = async () => {
@@ -139,8 +148,24 @@ const Company: FC = () => {
     }
   };
 
-  const onSignConfirm = () => {
-    setSignOrder(true);
+  const onSignConfirm = async (event: any) => {
+    try {
+      event.preventDefault();
+      const { targetAddress, allowedAmount } = Object.fromEntries(new FormData(event.target)) as unknown as GenerateSignatureInputData;
+      const offChainValidator = new OffChainValidator(web3, instanceAddress);
+      const nonce = Date.now();
+      const signature = await offChainValidator.signTransaction(targetAddress, toWei(allowedAmount), nonce, account);
+      setClaimInfo({
+        amount: allowedAmount,
+        claimerAddress: targetAddress,
+        nonce,
+        signature,
+        contractAddress: instanceAddress,
+      });
+      setSignOrder(true);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -166,19 +191,21 @@ const Company: FC = () => {
               <Card.Subtitle className="mb-2 text-muted">{instanceAddress}</Card.Subtitle>
               <Card.Text>Balance: {fromWei(instanceBalance)} ETH</Card.Text>
               <Accordion defaultActiveKey="0">
-                <Accordion.Item eventKey="0">
-                  <Accordion.Header>Sign a payment order</Accordion.Header>
-                  <Accordion.Body>
-                    <FloatingLabel label="Claimer Address" className="mb-3">
-                      <FormControl name="targetAddress" placeholder="0x0..." required />
-                    </FloatingLabel>
-                    <InputGroup className="mb-3">
-                      <FormControl name="allowedAmount" placeholder="0.0000" required />
-                      <InputGroup.Text>ETH</InputGroup.Text>
-                    </InputGroup>
-                    <Button onClick={onSignConfirm}>Generate signature</Button>
-                  </Accordion.Body>
-                </Accordion.Item>
+                <Form onSubmit={onSignConfirm}>
+                  <Accordion.Item eventKey="0">
+                    <Accordion.Header>Sign a payment order</Accordion.Header>
+                    <Accordion.Body>
+                      <FloatingLabel label="Claimer Address" className="mb-3">
+                        <FormControl name="targetAddress" placeholder="0x0..." required />
+                      </FloatingLabel>
+                      <InputGroup className="mb-3">
+                        <FormControl name="allowedAmount" placeholder="0.0000" required />
+                        <InputGroup.Text>ETH</InputGroup.Text>
+                      </InputGroup>
+                      <Button type="submit">Generate signature</Button>
+                    </Accordion.Body>
+                  </Accordion.Item>
+                </Form>
               </Accordion>
             </Card.Body>
             <Card.Footer className="d-flex justify-content-end">
@@ -247,35 +274,35 @@ const Company: FC = () => {
             </p>
             <InputGroup className="mb-3">
               <InputGroup.Text>Allowed Address</InputGroup.Text>
-              <FormControl aria-label="Adress allowed to make the claim" placeholder="0x0" disabled />
+              <FormControl aria-label="Adress allowed to make the claim" placeholder="0x0" disabled value={claimInfo?.claimerAddress} />
               <Button className="form-button" variant="outline-dark">
                 <FaCopy />
               </Button>
             </InputGroup>
             <InputGroup className="mb-3">
               <InputGroup.Text>Contract Address</InputGroup.Text>
-              <FormControl aria-label="Contract Adress where to make the the claim" placeholder="0x0" disabled />
+              <FormControl aria-label="Contract Adress where to make the the claim" placeholder="0x0" disabled value={claimInfo?.contractAddress} />
               <Button className="form-button" variant="outline-dark">
                 <FaCopy />
               </Button>
             </InputGroup>
             <InputGroup className="mb-3">
               <InputGroup.Text>Allowed Amount</InputGroup.Text>
-              <FormControl aria-label="Allowed amount to claim in eth" placeholder="0.0000" disabled />
+              <FormControl aria-label="Allowed amount to claim in eth" placeholder="0.0000" disabled value={claimInfo?.amount} />
               <Button className="form-button" variant="outline-dark">
                 <FaCopy />
               </Button>
             </InputGroup>
             <InputGroup className="mb-3">
               <InputGroup.Text>Nonce</InputGroup.Text>
-              <FormControl aria-label="Unique nonce for claim order" placeholder={Date.now().toString()} disabled />
+              <FormControl aria-label="Unique nonce for claim order" placeholder={Date.now().toString()} disabled value={claimInfo?.nonce} />
               <Button className="form-button" variant="outline-dark">
                 <FaCopy />
               </Button>
             </InputGroup>
             <InputGroup className="mb-3">
               <InputGroup.Text>Signature</InputGroup.Text>
-              <FormControl aria-label="Generated signature hash" placeholder="0x0" disabled />
+              <FormControl aria-label="Generated signature hash" placeholder="0x0" disabled value={claimInfo?.signature} />
               <Button className="form-button" variant="outline-dark">
                 <FaCopy />
               </Button>

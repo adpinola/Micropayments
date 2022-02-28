@@ -11,18 +11,18 @@ export default class OffChainValidator implements IOffChainValidator {
     this._contractAddress = contractAddress;
   }
 
-  async signTransaction(recipient: string, amount: number, nonce: number, signerAddress: string): Promise<string> {
+  async signTransaction(recipient: string, amount: string, nonce: number, signerAddress: string): Promise<string> {
     const hash = this.constructMessage(recipient, amount, nonce);
     return this._web3.eth.sign(hash, signerAddress); // this method is not complaiant with EIP-155: review
   }
 
-  isValidSignature(recipient: string, amount: number, nonce: number, signature: string, expectedSigner: string): boolean {
+  isValidSignature(recipient: string, amount: string, nonce: number, signature: string, expectedSigner: string): boolean {
     const message = this.prefixed(this.constructMessage(recipient, amount, nonce));
     const signer = OffChainValidator.recoverSigner(message, signature);
     return signer.toLowerCase() === stripHexPrefix(expectedSigner).toLowerCase();
   }
 
-  private constructMessage(recipient: string, amount: number, nonce: number): string {
+  private constructMessage(recipient: string, amount: string, nonce: number): string {
     const valuesToSign: Mixed[] = [
       { t: 'address', v: recipient },
       { t: 'uint256', v: amount },
