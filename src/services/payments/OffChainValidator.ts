@@ -1,6 +1,6 @@
 import Web3 from 'web3';
-import { Mixed } from 'web3-utils';
 import { fromRpcSig, ecrecover, pubToAddress, stripHexPrefix } from 'ethereumjs-util';
+import { soliditySHA3 } from 'ethereumjs-abi';
 import IOffChainValidator from './IOffChainValidator';
 
 export default class OffChainValidator implements IOffChainValidator {
@@ -12,33 +12,27 @@ export default class OffChainValidator implements IOffChainValidator {
   }
 
   async signTransaction(recipient: string, amount: string, nonce: number, signerAddress: string): Promise<string> {
+    // eslint-disable-next-line no-debugger
+    debugger;
     const hash = this.constructMessage(recipient, amount, nonce);
-    return this._web3.eth.sign(hash, signerAddress); // this method is not complaiant with EIP-155: review
+    return (window as any).ethereum.request({
+      method: 'personal_sign',
+      params: [signerAddress, `0x${hash.toString('hex')}`],
+    });
   }
 
   isValidSignature(recipient: string, amount: string, nonce: number, signature: string, expectedSigner: string): boolean {
-    const message = this.prefixed(this.constructMessage(recipient, amount, nonce));
+    const message = OffChainValidator.prefixed(this.constructMessage(recipient, amount, nonce));
     const signer = OffChainValidator.recoverSigner(message, signature);
     return signer.toLowerCase() === stripHexPrefix(expectedSigner).toLowerCase();
   }
 
-  private constructMessage(recipient: string, amount: string, nonce: number): string {
-    const valuesToSign: Mixed[] = [
-      { t: 'address', v: recipient },
-      { t: 'uint256', v: amount },
-      { t: 'uint256', v: nonce },
-      { t: 'address', v: this._contractAddress },
-    ];
-    const hash = this._web3.utils.soliditySha3Raw(...valuesToSign);
-    return hash;
+  private constructMessage(recipient: string, amount: string, nonce: number): Buffer {
+    return soliditySHA3(['address', 'uint256', 'uint256', 'address'], [recipient, amount, nonce, this._contractAddress]);
   }
 
-  private prefixed(hash: string): Buffer {
-    const valuesToSign: Mixed[] = [
-      { t: 'string', v: '\x19Ethereum Signed Message:\n32' },
-      { t: 'bytes32', v: hash },
-    ];
-    return Buffer.from(this._web3.utils.soliditySha3Raw(...valuesToSign));
+  private static prefixed(hash: Buffer): Buffer {
+    return soliditySHA3(['string', 'bytes32'], ['\x19Ethereum Signed Message:\n32', `0x${hash.toString('hex')}`]);
   }
 
   private static recoverSigner(message: Buffer, signature: string): string {

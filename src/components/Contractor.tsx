@@ -59,9 +59,11 @@ const Contractor: FC = () => {
       event.preventDefault();
       const { contractAddress, amount, nonce, signature } = Object.fromEntries(new FormData(event.target)) as unknown as ClaimInfo;
 
-      // pre-validate
       const offChainValidator = new OffChainValidator(web3, contractAddress);
-      console.log(offChainValidator.isValidSignature(account, toWei(amount), nonce, signature, '0xf80EC9B1C47426BDe7F5A36af7EAF9fD682EbC6A'));
+      console.log(
+        'isValidSignature: ',
+        offChainValidator.isValidSignature(account, toWei(amount), nonce, signature, '0xf80EC9B1C47426BDe7F5A36af7EAF9fD682EbC6A')
+      );
 
       const micropaymentsContract = new MicropaymentsContract(web3, abi as AbiItem[], contractAddress, account);
       micropaymentsContract.onPaymentClaimed(account, claimSuccessCallback);
