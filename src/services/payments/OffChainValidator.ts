@@ -12,13 +12,8 @@ export default class OffChainValidator implements IOffChainValidator {
   }
 
   async signTransaction(recipient: string, amount: string, nonce: number, signerAddress: string): Promise<string> {
-    // eslint-disable-next-line no-debugger
-    debugger;
     const hash = this.constructMessage(recipient, amount, nonce);
-    return (window as any).ethereum.request({
-      method: 'personal_sign',
-      params: [signerAddress, `0x${hash.toString('hex')}`],
-    });
+    return this._web3.eth.personal.sign(`0x${hash.toString('hex')}`, signerAddress, '');
   }
 
   isValidSignature(recipient: string, amount: string, nonce: number, signature: string, expectedSigner: string): boolean {
