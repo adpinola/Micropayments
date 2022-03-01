@@ -1,5 +1,3 @@
-/* eslint-disable no-debugger */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import {
   Button,
@@ -38,7 +36,6 @@ enum WalletStatus {
 }
 
 const Company: FC = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [claimInfo, setClaimInfo] = useState<ClaimInfo>();
   const [instanceBalance, setInstanceBalance] = useState<string>('');
   const [instanceAddress, setInstanceAddress] = useState<string>('');

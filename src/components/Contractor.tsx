@@ -8,7 +8,6 @@ import MetaMaskIcon from './MetaMaskIcon';
 import { ClaimInfo } from '../assets/formData/ClaimInfo';
 import MicropaymentsContract from '../services/ethereum/MicropaymentsContract';
 import { abi } from '../assets/Micropayments.json';
-import OffChainValidator from '../services/payments/OffChainValidator';
 
 enum WalletStatus {
   Locked = 'Locked',
@@ -16,7 +15,6 @@ enum WalletStatus {
 }
 
 const Contractor: FC = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [balance, setBalance] = useState<string>('0');
   const [walletStatus, setWalletStatus] = useState<WalletStatus>(WalletStatus.Locked);
   const [showModal, setShowModal] = useState(false);
@@ -58,13 +56,6 @@ const Contractor: FC = () => {
 
       event.preventDefault();
       const { contractAddress, amount, nonce, signature } = Object.fromEntries(new FormData(event.target)) as unknown as ClaimInfo;
-
-      const offChainValidator = new OffChainValidator(web3, contractAddress);
-      console.log(
-        'isValidSignature: ',
-        offChainValidator.isValidSignature(account, toWei(amount), nonce, signature, '0xf80EC9B1C47426BDe7F5A36af7EAF9fD682EbC6A')
-      );
-
       const micropaymentsContract = new MicropaymentsContract(web3, abi as AbiItem[], contractAddress, account);
       micropaymentsContract.onPaymentClaimed(account, claimSuccessCallback);
       await micropaymentsContract.claimPayment(toWei(amount), nonce, signature);
