@@ -8,7 +8,8 @@ module.exports = class OffChainValidator {
 
   async signTransaction(recipient, amount, nonce, signerAddress) {
     const hash = this.constructMessage(recipient, amount, nonce);
-    return this._web3.eth.sign(hash, signerAddress); // this method is not complaiant with EIP-155: review
+    // ToDo: replace with web3.eth.personal.sign
+    return this._web3.eth.sign(hash, signerAddress);
   }
 
   constructMessage(recipient, amount, nonce) {
