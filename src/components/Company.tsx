@@ -31,6 +31,17 @@ const Company: FC = () => {
   const account = useAccount();
   const contractFactory = useContractFactoryContext();
 
+  // #region Get Contracts
+  const refreshAvilableContracts = useCallback(async () => {
+    const contracts = await contractFactory.getMicropaymentsContracts();
+    setAvailableContracts(contracts);
+  }, [contractFactory]);
+
+  useEffect(() => {
+    if (walletStatus === WalletStatus.Connected) refreshAvilableContracts();
+  }, [refreshAvilableContracts, walletStatus]);
+  // #endregion
+
   // #region Account Change
   useEffect(() => {
     const onAccountChange = async () => {
@@ -40,34 +51,22 @@ const Company: FC = () => {
         return;
       }
       if (!(await contractFactory.isOwner(account))) {
-        console.log('You are not the owner of this factory...');
         setShowToast(true);
         setWalletStatus(WalletStatus.Locked);
         return;
       }
       contractFactory.updateUserAccount(account);
+      contractFactory.onMicropaymentsCreated(account, () => {
+        setCreateSpinner(false);
+        setCreatingContract(false);
+        refreshAvilableContracts();
+      });
       setShowToast(false);
       setWalletStatus(WalletStatus.Connected);
     };
 
     onAccountChange();
-  }, [account, contractFactory]);
-  // #endregion
-
-  // #region Get Contracts
-  const refreshAvilableContracts = useCallback(async () => {
-    const contracts = await contractFactory.getMicropaymentsContracts();
-    setAvailableContracts(contracts);
-  }, [contractFactory]);
-
-  useEffect(() => {
-    if (walletStatus === WalletStatus.Connected) refreshAvilableContracts();
-    contractFactory.onMicropaymentsCreated(account, () => {
-      setCreateSpinner(false);
-      setCreatingContract(false);
-      refreshAvilableContracts();
-    });
-  }, [refreshAvilableContracts, walletStatus, contractFactory, account]);
+  }, [account, contractFactory, refreshAvilableContracts]);
   // #endregion
 
   // #region Instance Selected
