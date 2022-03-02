@@ -1,5 +1,5 @@
 # Subscription
-Decentralized Application that uses a Smart Contract to allow/deny access to specific sections of the site
+Decentralized Application that provides a Micropayments platform for Companies and Contractors.
 
 ## Table of contents
 
@@ -17,7 +17,7 @@ Decentralized Application that uses a Smart Contract to allow/deny access to spe
 To get started developing for this projects, please clone the repo:
 
 ```bash
-git clone https://github.com/adpinola/Subscription.git
+git clone https://github.com/adpinola/Micropayments.git
 ```
 
 ### Prerequisites
@@ -33,7 +33,7 @@ These two tools are not included in the `package.json` file, so you will need to
 If you don't have the modules installed, execute this inside the project directory
 
 ```bash
-cd Subscription
+cd Micropayments
 npm install
 ```
 
@@ -53,14 +53,6 @@ This application uses Truffle to test the contract code. Run the following comma
 
 ```bash
 npm run contract:test
-```
-
-This will open a window with a list of every .spec file that is in the `integration` folder. If you click on one of them, it will open another window of the selected browser and start its test. You can visually track every step of the testing process and get snapshots.
-
-To run the tests in "headless" mode (without the visual interface), run the following
-
-```bash
-npm run cypress:all
 ```
 
 ## Linting

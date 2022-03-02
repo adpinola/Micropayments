@@ -1,7 +1,7 @@
 name: Deploy DApp
 on:
   push:
-    branches: 
+    branches:
       - main
 
 jobs:
@@ -44,4 +44,4 @@ jobs:
           target_branch: gh-pages
           build_dir: build
         env:
-          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

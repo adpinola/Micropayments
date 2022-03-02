@@ -1,5 +1,6 @@
 {
   "name": "micropayments-platform",
+  "homepage": "https://adpinola.github.io/Miropayments/",
   "version": "0.1.0",
   "description": "Simple platform to deliver micropayments",
   "directories": {
@@ -15,7 +16,7 @@
     "contract:test": "cross-env TRUFFLE_ENV=test truffle run coverage",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
-    "solhint": "./node_modules/.bin/solhint -f table contracts/**/*.sol",
+    "solhint": "solhint -f table contracts/**/*.sol",
     "lint:eslint": "eslint src/**/*.{js,jsx,ts,tsx}",
     "format:eslint": "eslint --fix src/**/*.{js,jsx,ts,tsx}",
     "lint:prettier": "prettier --check \"**/*.{js,jsx,ts,tsx}\" ",
