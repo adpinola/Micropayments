@@ -7,12 +7,12 @@ const Home: FC = () => (
   <div id="home">
     <Navbar bg="primary" expand="lg" className="navbar" fixed="top">
       <Container>
-        <Navbar.Brand href="/">Micropayments Factory</Navbar.Brand>
+        <Navbar.Brand href="#">Micropayments Factory</Navbar.Brand>
         <Navbar.Toggle aria-controls="navbarScroll" />
         <Navbar.Collapse id="navbarScroll" className="justify-content-end">
           <Nav>
-            <Nav.Link href="/company">Company</Nav.Link>
-            <Nav.Link href="/contractor">Contractor</Nav.Link>
+            <Nav.Link href="#/company">Company</Nav.Link>
+            <Nav.Link href="#/contractor">Contractor</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>
