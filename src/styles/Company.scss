@@ -21,25 +21,10 @@
       }
     }
 
-    #contract-details {
+    #contract-side-card {
       height: 100%;
       width: 100%;
       margin: 10px;
-
-      &.hide {
-        //transition: transform 1s ease-in;
-        //transform: translate(100%, 0);
-        display: none;
-      }
-
-      &.show {
-        display: block;
-        //transform: none;
-      }
-
-      .card {
-        height: 100%;
-      }
     }
   }
 }

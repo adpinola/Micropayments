@@ -25,9 +25,9 @@ const useWeb3 = () => {
       (web3.currentProvider as any).on('accountsChanged', accountsChangedCallback);
       getAccountData();
     }
-    return () => {
-      (web3.currentProvider as any).off('accountsChanged', accountsChangedCallback);
-    };
+    // return () => {
+    //   (web3.currentProvider as any).off('accountsChanged', accountsChangedCallback);
+    // };
   }, [web3]);
 
   return { web3, account, connectToMetaMask };
