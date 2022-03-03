@@ -8,9 +8,9 @@
     align-items: center;
     justify-content: center;
     .card {
-      width: 25rem;
+      min-width: 25rem;
       .card-title {
-        margin-top: 0.5rem;
+        margin: 0.5rem;
       }
     }
   }

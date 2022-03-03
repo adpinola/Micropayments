@@ -12,6 +12,7 @@ import MicropaymentsContract from '../services/ethereum/MicropaymentsContract';
 import { GenerateSignatureInputData } from '../assets/formData/GenerateSignatureInputData';
 import OffChainValidator from '../services/payments/OffChainValidator';
 import { ClaimInfo } from '../assets/formData/ClaimInfo';
+import LoaderButton from './LoaderButton';
 
 interface IContractDetails {
   closeCallback: () => Promise<void> | void;
@@ -26,6 +27,7 @@ const ContractDetails: FC<IContractDetails> = (props: IContractDetails) => {
   const { web3 } = useWeb3();
   const [micropaymentInstance, setMicropaymentInstance] = useState<IMicropaymentsContract>();
   const [balance, setBalance] = useState<string>('');
+  const [signLoader, setSignLoader] = useState(false);
 
   useEffect(() => {
     const updateInstanceData = async () => {
@@ -47,6 +49,7 @@ const ContractDetails: FC<IContractDetails> = (props: IContractDetails) => {
     try {
       const instanceAddress = props.data.location;
       event.preventDefault();
+      setSignLoader(true);
       const { targetAddress, allowedAmount } = Object.fromEntries(new FormData(event.target)) as unknown as GenerateSignatureInputData;
       const offChainValidator = new OffChainValidator(web3, instanceAddress);
       const nonce = Date.now();
@@ -61,6 +64,7 @@ const ContractDetails: FC<IContractDetails> = (props: IContractDetails) => {
     } catch (e) {
       console.log(e);
     }
+    setSignLoader(false);
   };
 
   return (
@@ -85,7 +89,9 @@ const ContractDetails: FC<IContractDetails> = (props: IContractDetails) => {
                   <FormControl name="allowedAmount" placeholder="0.0000" required />
                   <InputGroup.Text>ETH</InputGroup.Text>
                 </InputGroup>
-                <Button type="submit">Generate signature</Button>
+                <LoaderButton type="submit" showLoader={signLoader}>
+                  &nbsp;Generate Signature&nbsp;
+                </LoaderButton>
               </Accordion.Body>
             </Accordion.Item>
           </Form>

@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, Modal, FloatingLabel, FormControl, InputGroup, Toast, Form, Spinner } from 'react-bootstrap';
+import { Button, Modal, FloatingLabel, FormControl, InputGroup, Toast, Form } from 'react-bootstrap';
 import { FaRegPlusSquare } from 'react-icons/fa';
 import { toWei } from 'web3-utils';
 import { CreateMicropaymentData } from '../assets/formData/CreateMicropaymentData';
@@ -11,6 +11,7 @@ import MetaMaskIcon from './MetaMaskIcon';
 import { ClaimInfo } from '../assets/formData/ClaimInfo';
 import ContractDetails from './ContractDetails';
 import SignatureDetailsModal from './SignatureDetailsModal';
+import LoaderButton from './LoaderButton';
 
 enum WalletStatus {
   Locked = 'Locked',
@@ -170,10 +171,9 @@ const Company: FC = () => {
             </InputGroup>
           </Modal.Body>
           <Modal.Footer>
-            <Button type="submit">
-              {createSpinner ? <Spinner animation="border" as="span" size="sm" /> : null}
+            <LoaderButton type="submit" showLoader={createSpinner}>
               &nbsp;Confirm&nbsp;
-            </Button>
+            </LoaderButton>
           </Modal.Footer>
         </Form>
       </Modal>

@@ -8,6 +8,7 @@ import MetaMaskIcon from './MetaMaskIcon';
 import { ClaimInfo } from '../assets/formData/ClaimInfo';
 import MicropaymentsContract from '../services/ethereum/MicropaymentsContract';
 import { abi } from '../assets/Micropayments.json';
+import LoaderButton from './LoaderButton';
 
 enum WalletStatus {
   Locked = 'Locked',
@@ -18,6 +19,7 @@ const Contractor: FC = () => {
   const [balance, setBalance] = useState<string>('0');
   const [walletStatus, setWalletStatus] = useState<WalletStatus>(WalletStatus.Locked);
   const [showModal, setShowModal] = useState(false);
+  const [claimSpinner, setClaimSpinner] = useState(false);
   const connect = useMetaMask();
   const account = useAccount();
   const { web3 } = useWeb3();
@@ -47,20 +49,23 @@ const Contractor: FC = () => {
   }, [walletStatus, updateBalance]);
 
   const claimPayment = async (event: any) => {
-    try {
-      const claimSuccessCallback = () => {
-        updateBalance();
-        setShowModal(false);
-        micropaymentsContract.offPaymentClaimed(account, claimSuccessCallback);
-      };
+    const claimCallback = () => {
+      updateBalance();
+      setClaimSpinner(false);
+      setShowModal(false);
+      micropaymentsContract.offPaymentClaimed(account, claimCallback);
+    };
 
-      event.preventDefault();
-      const { contractAddress, amount, nonce, signature } = Object.fromEntries(new FormData(event.target)) as unknown as ClaimInfo;
-      const micropaymentsContract = new MicropaymentsContract(web3, abi as AbiItem[], contractAddress, account);
-      micropaymentsContract.onPaymentClaimed(account, claimSuccessCallback);
+    event.preventDefault();
+    setClaimSpinner(true);
+    const { contractAddress, amount, nonce, signature } = Object.fromEntries(new FormData(event.target)) as unknown as ClaimInfo;
+    const micropaymentsContract = new MicropaymentsContract(web3, abi as AbiItem[], contractAddress, account);
+    micropaymentsContract.onPaymentClaimed(account, claimCallback);
+    try {
       await micropaymentsContract.claimPayment(toWei(amount), nonce, signature);
     } catch (e) {
       console.log(e);
+      claimCallback();
     }
   };
 
@@ -110,7 +115,9 @@ const Contractor: FC = () => {
             </FloatingLabel>
           </Modal.Body>
           <Modal.Footer>
-            <Button type="submit">Confirm</Button>
+            <LoaderButton type="submit" showLoader={claimSpinner}>
+              &nbsp;Confirm&nbsp;
+            </LoaderButton>
           </Modal.Footer>
         </Form>
       </Modal>
