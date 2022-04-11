@@ -34,7 +34,7 @@ contract('Micropayments Contract should', (accounts) => {
     expect(balance.toString()).to.equal(initialValue);
   });
 
-  it('pay the allowed amount to claimer if signature matche', async () => {
+  it('pay the allowed amount to claimer if signature matches', async () => {
     const offChainValidator = new OffChainValidator(web3, contractUnderTest.address);
     const allowance = '10000000000';
     const nonce = Date.now();

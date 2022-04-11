@@ -117,4 +117,62 @@ contract('MicropaymentsFactory Contract should', (accounts) => {
     const availableContracts = await contractUnderTest.getMicropaymentsContracts.call();
     expect(availableContracts.length).to.equal(2);
   });
+
+  it('create a new contract with the same name of a deleted old contract', async () => {
+    const nameToReapeat = 'Name To Repeat';
+    await contractUnderTest.createMicropayment(nameToReapeat, {
+      value: micropaymentContractInitialValue,
+    });
+
+    const micropaymentsContracts = await contractUnderTest.getMicropaymentsContracts.call();
+
+    await contractUnderTest.deleteContract(micropaymentsContracts[0].location);
+
+    await contractUnderTest.createMicropayment(nameToReapeat, {
+      value: micropaymentContractInitialValue,
+    });
+
+    const availableContracts = await contractUnderTest.getMicropaymentsContracts.call();
+    expect(availableContracts.length).to.equal(1);
+  });
+
+  it("not loose consistency in the Contract's list", async () => {
+    await contractUnderTest.createMicropayment('Contract A', {
+      value: micropaymentContractInitialValue,
+    });
+    await contractUnderTest.createMicropayment('Contract B', {
+      value: micropaymentContractInitialValue,
+    });
+    await contractUnderTest.createMicropayment('Contract C', {
+      value: micropaymentContractInitialValue,
+    });
+
+    const micropaymentsContracts = await contractUnderTest.getMicropaymentsContracts.call();
+    await contractUnderTest.deleteContract(micropaymentsContracts[0].location);
+    await contractUnderTest.deleteContract(micropaymentsContracts[1].location);
+
+    await contractUnderTest.createMicropayment('Contract D', {
+      value: micropaymentContractInitialValue,
+    });
+
+    await contractUnderTest.deleteContract(micropaymentsContracts[2].location);
+
+    const availableContracts = await contractUnderTest.getMicropaymentsContracts.call();
+    expect(availableContracts.length).to.equal(1);
+  });
+
+  it('not allow deleting the same contract twice', async () => {
+    await contractUnderTest.createMicropayment('Contract A', {
+      value: micropaymentContractInitialValue,
+    });
+    const micropaymentsContracts = await contractUnderTest.getMicropaymentsContracts.call();
+
+    await contractUnderTest.deleteContract(micropaymentsContracts[0].location);
+
+    try {
+      await contractUnderTest.deleteContract(micropaymentsContracts[0].location);
+    } catch (error) {
+      expect(error.data.name).to.equal('RuntimeError');
+    }
+  });
 });
