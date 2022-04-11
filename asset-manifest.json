@@ -1,0 +1,24 @@
+{
+  "files": {
+    "main.css": "/Micropayments/static/css/main.4a96ad1b.chunk.css",
+    "main.js": "/Micropayments/static/js/main.886161b1.chunk.js",
+    "main.js.map": "/Micropayments/static/js/main.886161b1.chunk.js.map",
+    "runtime-main.js": "/Micropayments/static/js/runtime-main.970b828d.js",
+    "runtime-main.js.map": "/Micropayments/static/js/runtime-main.970b828d.js.map",
+    "static/js/2.b6ab4d70.chunk.js": "/Micropayments/static/js/2.b6ab4d70.chunk.js",
+    "static/js/2.b6ab4d70.chunk.js.map": "/Micropayments/static/js/2.b6ab4d70.chunk.js.map",
+    "static/js/3.512cb520.chunk.js": "/Micropayments/static/js/3.512cb520.chunk.js",
+    "static/js/3.512cb520.chunk.js.map": "/Micropayments/static/js/3.512cb520.chunk.js.map",
+    "index.html": "/Micropayments/index.html",
+    "static/css/main.4a96ad1b.chunk.css.map": "/Micropayments/static/css/main.4a96ad1b.chunk.css.map",
+    "static/js/2.b6ab4d70.chunk.js.LICENSE.txt": "/Micropayments/static/js/2.b6ab4d70.chunk.js.LICENSE.txt",
+    "static/media/ethereum-logo.b3ec96d9.svg": "/Micropayments/static/media/ethereum-logo.b3ec96d9.svg",
+    "static/media/metamask.09e5f554.svg": "/Micropayments/static/media/metamask.09e5f554.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.970b828d.js",
+    "static/js/2.b6ab4d70.chunk.js",
+    "static/css/main.4a96ad1b.chunk.css",
+    "static/js/main.886161b1.chunk.js"
+  ]
+}
