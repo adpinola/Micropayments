@@ -47,9 +47,13 @@ contract MicropaymentsFactory is Ownable {
     function deleteContract(address location) external onlyOwner {
         uint256 contractIndex = addressToIndex[location];
         Micropayments toDelete = Micropayments(contracts[contractIndex]);
-        // ToDO: Remove name from map to allow reuse
+
+        bytes32 nameHash = keccak256(bytes(toDelete.name()));
+        nameToAddress[nameHash] = address(0);
+
         toDelete.shutdown();
 
+        addressToIndex[address(Micropayments(contracts[contracts.length - 1]))] = contractIndex;
         contracts[contractIndex] = contracts[contracts.length - 1];
         contracts.pop();
 
