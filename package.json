@@ -37,7 +37,7 @@
   "license": "ISC",
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.2",
-    "@truffle/hdwallet-provider": "^2.0.1",
+    "@truffle/hdwallet-provider": "^2.0.9",
     "@types/node": "^17.0.23",
     "@types/react": "^17.0.37",
     "@types/react-dom": "^18.0.0",
